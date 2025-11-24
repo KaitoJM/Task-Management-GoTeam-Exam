@@ -78,7 +78,9 @@ class TaskController extends Controller
         $task->update($request->only(['description', 'done']));
 
         // Return the updated task data
-        return response()->json(new TaskResource($task), 200);
+        return (new TaskResource($task))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
