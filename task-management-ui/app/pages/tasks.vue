@@ -7,5 +7,6 @@ import TaskList from "~/components/TaskList.vue";
 
 definePageMeta({
   layout: "main-layout",
+  middleware: "auth",
 });
 </script>
