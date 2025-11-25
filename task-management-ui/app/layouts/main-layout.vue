@@ -5,7 +5,9 @@
       <div class="w-[300px] pr-[50px] h-full max-h-[100vh] overflow-y-auto">
         <TaskDateSelection></TaskDateSelection>
       </div>
-      <div class="flex justify-center flex-1">
+      <div
+        class="flex justify-center flex-1 h-full max-h-[100vh] overflow-y-auto"
+      >
         <div class="w-[700px]">
           <slot></slot>
         </div>

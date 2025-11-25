@@ -1,12 +1,10 @@
 <template>
-  <div>
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eum voluptate ea
-    excepturi nesciunt quaerat veniam numquam repellat soluta! Soluta, sit quo?
-    Est asperiores, deserunt vitae officia fugit ea mollitia libero?
-  </div>
+  <TaskList></TaskList>
 </template>
 
 <script setup lang="ts">
+import TaskList from "~/components/TaskList.vue";
+
 definePageMeta({
   layout: "main-layout",
 });
