@@ -2,7 +2,7 @@
 import { computed } from "vue";
 
 interface Props {
-  taskDate?: string;
+  taskDate: string;
   active?: boolean;
 }
 
@@ -19,9 +19,9 @@ const activeClass = computed(() => {
 
 <template>
   <NuxtLink
-    to="/#"
+    :to="`/tasks/${taskDate}`"
     :class="[
-      'py-1 px-4 rounded-xl w-full flex text-sm h-8 items-center',
+      'py-1 px-4 rounded-xl w-full flex text-sm h-8 items-center hover:bg-gray-100',
       activeClass,
     ]"
   >
