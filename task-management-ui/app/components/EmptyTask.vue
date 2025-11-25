@@ -34,3 +34,9 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useTaskStore } from "~/store/task.store";
+
+const taskStore = useTaskStore();
+</script>
