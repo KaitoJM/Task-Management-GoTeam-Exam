@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskRequest;
+use App\Http\Requests\FilterTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
@@ -14,13 +15,28 @@ class TaskController extends Controller
     /**
      * Display a listing of the task resource of the authenticated user.
      */
-    public function index()
+    public function index(FilterTaskRequest $request)
     {
         // Get authenticated user's ID
         $userId = Auth::id();
 
-        // Get all tasks created by the authenticated user.
-        $tasks = Task::where('user_id', $userId)->get();
+        // Initial query of getting the of the authenticated user.
+        $query = Task::where('user_id', $userId);
+
+        // Filter by created_at date
+        if ($request->filled('created_at_date')) {
+            $date = $request->created_at_date;
+
+            $query->whereDate('created_at', $date);
+        }
+
+        // Filter by description
+        if ($request->filled('description')) {
+            $query->where('description', 'LIKE', '%' . $request->description . '%');
+        }
+
+        // Process query
+        $tasks = $query->get();
 
         // Return a collection of the tasks.
         return TaskResource::collection($tasks);
