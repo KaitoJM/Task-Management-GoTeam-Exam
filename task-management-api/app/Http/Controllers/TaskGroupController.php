@@ -24,6 +24,6 @@ class TaskGroupController extends Controller
             ->pluck('only_date');
 
         
-        return response()->json($dates);
+        return response()->json(['data' => $dates]);
     }
 }
