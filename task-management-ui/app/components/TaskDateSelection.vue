@@ -24,5 +24,5 @@ import TaskDateItem from "./TaskDateItem.vue";
 import { useTaskStore, type WeekGroup } from "~/store/task.store";
 
 const taskStore = useTaskStore();
-const weekGroups: WeekGroup[] = taskStore.groupedByWeek;
+const weekGroups = computed<WeekGroup[]>(() => taskStore.groupedByWeek);
 </script>

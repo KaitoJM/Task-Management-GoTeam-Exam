@@ -8,7 +8,7 @@
           :done="task.done"
           @toggle="toggleTask(task.id)"
         >
-          {{ task.text }}
+          {{ task.description }}
         </TaskItem>
       </ul>
     </div>
@@ -48,23 +48,12 @@
 </template>
 
 <script setup lang="ts">
-const tasks = useState("tasks", () => [
-  {
-    id: 1,
-    text: "I need to change the background color to white for the login page",
-    done: false,
-  },
-  {
-    id: 2,
-    text: "Fix issue in unable to click the submit button for the edit task dialog",
-    done: false,
-  },
-  {
-    id: 3,
-    text: "Fix an error message is shown when creating a task but the task was still created",
-    done: true,
-  },
-]);
+import { useTaskStore } from "~/store/task.store";
+import type { Task } from "~/types/task.type";
+
+const taskStore = useTaskStore();
+
+const tasks = computed<Task[]>(() => taskStore.activeCollection);
 
 function toggleTask(id: number) {
   const task = tasks.value.find((t) => t.id === id);

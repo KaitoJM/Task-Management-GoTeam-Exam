@@ -82,9 +82,16 @@ export const useTaskStore = defineStore("taskStore", () => {
       return;
     }
 
+    let query: string = "";
+
+    // filter by created_date if date is given
+    if (date) {
+      query = `?created_at_date=${date}`;
+    }
+
     try {
       const res: ApiResponseToken = await $fetch(
-        `${config.public.apiBase}tasks`,
+        `${config.public.apiBase}tasks${query}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -15,7 +15,9 @@ definePageMeta({
 const taskStore = useTaskStore();
 
 onMounted(async () => {
-  await taskStore.getTaskGroups();
+  if (!taskStore.dateGroups.length) {
+    await taskStore.getTaskGroups();
+  }
 
   const today = new Date().toISOString().split("T")[0];
   if (today) {
