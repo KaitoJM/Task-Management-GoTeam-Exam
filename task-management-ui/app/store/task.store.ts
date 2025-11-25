@@ -5,7 +5,7 @@ import {
   isYesterday,
   parseISO,
 } from "date-fns";
-import type { Task } from "~/types/task.type";
+import type { Task, TaskUpdate } from "~/types/task.type";
 
 const config = useRuntimeConfig();
 
@@ -181,6 +181,35 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  const updateTask = async (id: number, form: TaskUpdate) => {
+    const token = localStorage.getItem("token");
+    updatingTask.value = true;
+
+    if (!token) {
+      updatingTask.value = false;
+      return;
+    }
+
+    try {
+      const res: ApiCreateTaskResponse = await $fetch(
+        `${config.public.apiBase}tasks/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: form,
+        }
+      );
+
+      return res.data;
+    } catch (error) {
+      console.error("Error while updating task: ", error);
+    } finally {
+      updatingTask.value = false;
+    }
+  };
+
   return {
     activeCollection,
     dateGroups,
@@ -189,5 +218,6 @@ export const useTaskStore = defineStore("taskStore", () => {
     getTaskList,
     getTaskGroups,
     createNewTask,
+    updateTask,
   };
 });

@@ -63,10 +63,11 @@ const tasks = computed<Task[]>(() => taskStore.activeCollection);
 const newTask = ref<string>("");
 const taskCreationError = ref<string>("");
 
-const toggleTask = (id: number) => {
+const toggleTask = async (id: number) => {
   const task = tasks.value.find((t) => t.id === id);
   if (task) {
     task.done = !task.done;
+    await updateTaskStatus(task, task.done);
   }
 };
 
@@ -91,6 +92,22 @@ const createTask = async () => {
 
       // clear the new task value
       newTask.value = "";
+    }
+  } catch (error) {
+    // taskCreationError.value = error?.message;
+  }
+};
+
+const updateTaskStatus = async (task: Task, status: boolean) => {
+  try {
+    const taskCreationReponse: Task | undefined = await taskStore.updateTask(
+      task.id,
+      { done: status }
+    );
+
+    if (taskCreationReponse) {
+      // refresh the task list to update it
+      taskStore.getTaskList(taskStore.updatedActiveTaskGroup);
     }
   } catch (error) {
     // taskCreationError.value = error?.message;
