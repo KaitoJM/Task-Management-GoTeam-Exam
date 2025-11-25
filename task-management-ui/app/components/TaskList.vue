@@ -49,6 +49,7 @@
 
 <script setup lang="ts">
 import { useTaskStore } from "~/store/task.store";
+import { computed } from "vue";
 import type { Task } from "~/types/task.type";
 
 const taskStore = useTaskStore();

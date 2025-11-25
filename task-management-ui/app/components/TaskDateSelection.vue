@@ -1,6 +1,9 @@
 <template>
   <div class="flex flex-col gap-4 text-sm">
-    <div v-for="(group, indx) in weekGroups" :key="`week-group-${indx}`">
+    <div
+      v-for="(group, indx) in taskStore.groupedByWeek"
+      :key="`week-group-${indx}`"
+    >
       <ul class="flex flex-col gap-1">
         <p
           v-if="group.weekLabel != 'active week'"
@@ -21,8 +24,7 @@
 
 <script setup lang="ts">
 import TaskDateItem from "./TaskDateItem.vue";
-import { useTaskStore, type WeekGroup } from "~/store/task.store";
+import { useTaskStore } from "~/store/task.store";
 
 const taskStore = useTaskStore();
-const weekGroups = computed<WeekGroup[]>(() => taskStore.groupedByWeek);
 </script>
