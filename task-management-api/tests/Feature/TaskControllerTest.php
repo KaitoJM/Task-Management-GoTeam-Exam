@@ -68,8 +68,8 @@ describe('Create user tasks data', function () {
         $response = actingAs($user)->postJson('/api/tasks', $payload);
 
         $response->assertStatus(201)
-            ->assertJsonPath('description', 'New task')
-            ->assertJsonPath('user_id', $user->id);
+            ->assertJsonPath('data.description', 'New task')
+            ->assertJsonPath('data.user_id', $user->id);
 
         // Check database
         $this->assertDatabaseHas('tasks', [
@@ -261,5 +261,4 @@ describe('Delete Task', function () {
             'id' => $task->id,
         ]);
     });
-
 });

@@ -46,7 +46,9 @@ class TaskController extends Controller
         }
 
         // If success, return the newly created task data.
-        return response()->json($createdTask, 201);
+        return response()->json([
+            'data' => $createdTask
+        ], 201);
     }
 
     /**
