@@ -26,6 +26,52 @@ describe('Retrieving user tasks', function () {
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data');
     });
+
+    it('can filter tasks by created_at', function() {
+        $user = User::factory()->create();
+
+        // Tasks belonging to authenticated user
+        $task1 = Task::factory()->create([
+            'user_id' => $user->id,
+            'created_at' => '2025-11-20 00:00:00',
+        ]);
+        $task2 = Task::factory()->create([
+            'user_id' => $user->id,
+            'created_at' => '2025-11-21 00:00:00',
+        ]);
+
+        $response = actingAs($user)->getJson('/api/tasks?created_at_date=2025-11-20');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+
+        $response->assertJsonFragment([
+            'id' => 1, // $task1 id
+        ]);
+    });
+
+    it('can search tasks by description', function() {
+        $user = User::factory()->create();
+
+        // Tasks belonging to authenticated user
+        $task1 = Task::factory()->create([
+            'user_id' => $user->id,
+            'description' => 'This is a test 1',
+        ]);
+        $task2 = Task::factory()->create([
+            'user_id' => $user->id,
+            'description' => 'This is a test 2',
+        ]);
+
+        $response = actingAs($user)->getJson('/api/tasks?search=test 1');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+
+        $response->assertJsonFragment([
+            'id' => 1, // $task1 id
+        ]);
+    });
     
     it('returns empty array if user has no tasks', function () {
         $user = User::factory()->create();

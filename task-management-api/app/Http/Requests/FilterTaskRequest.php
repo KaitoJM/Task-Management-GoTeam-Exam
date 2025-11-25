@@ -23,7 +23,7 @@ class FilterTaskRequest extends FormRequest
     {
         return [
             'created_at' => 'sometimes|date',
-            'description' => 'sometimes',
+            'search' => 'sometimes',
         ];
     }
 }

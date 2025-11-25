@@ -31,8 +31,8 @@ class TaskController extends Controller
         }
 
         // Filter by description
-        if ($request->filled('description')) {
-            $query->where('description', 'LIKE', '%' . $request->description . '%');
+        if ($request->filled('search')) {
+            $query->where('description', 'LIKE', '%' . $request->search . '%');
         }
 
         // Process query
