@@ -2,14 +2,13 @@
   <div class="relative h-full">
     <div class="pb-[50px]">
       <ul class="flex flex-col gap-2">
-        <TaskItem>
-          I need to change the background color to white for the login page
-        </TaskItem>
-        <TaskItem>
-          I need to change the background color to white for the login page
-        </TaskItem>
-        <TaskItem :done="true">
-          I need to change the background color to white for the login page
+        <TaskItem
+          v-for="task in tasks"
+          :key="task.id"
+          :done="task.done"
+          @toggle="toggleTask(task.id)"
+        >
+          {{ task.text }}
         </TaskItem>
       </ul>
     </div>
@@ -47,3 +46,30 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+const tasks = useState("tasks", () => [
+  {
+    id: 1,
+    text: "I need to change the background color to white for the login page",
+    done: false,
+  },
+  {
+    id: 2,
+    text: "Fix issue in unable to click the submit button for the edit task dialog",
+    done: false,
+  },
+  {
+    id: 3,
+    text: "Fix an error message is shown when creating a task but the task was still created",
+    done: true,
+  },
+]);
+
+function toggleTask(id: number) {
+  const task = tasks.value.find((t) => t.id === id);
+  if (task) {
+    task.done = !task.done;
+  }
+}
+</script>

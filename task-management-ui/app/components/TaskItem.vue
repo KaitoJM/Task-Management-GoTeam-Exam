@@ -3,6 +3,7 @@
     class="flex items-center gap-2 border border-gray-200 rounded-lg py-2 px-4 hover:bg-gray-100 group"
   >
     <button
+      @click="handleToggle"
       :class="[
         'flex items-center justify-center w-[20px] h-[20px] rounded-full border border-gray-200',
         props.done ? 'bg-black text-white' : 'bg-white text-black',
@@ -58,4 +59,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const emit = defineEmits(["toggle"]);
+const handleToggle = () => {
+  emit("toggle");
+};
 </script>
