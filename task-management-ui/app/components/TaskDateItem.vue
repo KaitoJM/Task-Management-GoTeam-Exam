@@ -1,22 +1,3 @@
-<script setup lang="ts">
-import { computed } from "vue";
-
-interface Props {
-  taskDate: string;
-  active?: boolean;
-}
-
-const props = defineProps<Props>();
-
-const activeClass = computed(() => {
-  if (props.active) {
-    return "bg-black text-white";
-  }
-
-  return "";
-});
-</script>
-
 <template>
   <NuxtLink
     :to="`/tasks?date=${taskDate}`"
@@ -28,3 +9,28 @@ const activeClass = computed(() => {
     <slot></slot>
   </NuxtLink>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { useTaskStore } from "~/store/task.store";
+
+const taskStore = useTaskStore();
+
+interface Props {
+  taskDate: string;
+}
+
+const props = defineProps<Props>();
+
+const active = computed<boolean>(() => {
+  return props.taskDate == taskStore.updatedActiveTaskGroup;
+});
+
+const activeClass = computed(() => {
+  if (active.value) {
+    return "bg-black text-white";
+  }
+
+  return "";
+});
+</script>

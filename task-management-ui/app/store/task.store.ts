@@ -9,12 +9,16 @@ import type { Task } from "~/types/task.type";
 
 const config = useRuntimeConfig();
 
-type ApiResponseToken = {
+type ApiResponseTask = {
   data: Task[];
 };
 
-type ApiResponseTokenGroup = {
+type ApiResponseTaskGroup = {
   data: string[];
+};
+
+type ApiCreateTaskResponse = {
+  data: Task;
 };
 
 export type WeekDate = {
@@ -31,8 +35,13 @@ export const useTaskStore = defineStore("taskStore", () => {
   // state
   const activeCollection = ref<Task[]>([]);
   const dateGroups = ref<string[]>([]);
+  const activeTaskGroup = ref<string>("");
+  // loaders
+  const creatingTask = ref<boolean>(false);
+  const updatingTask = ref<boolean>(false);
+  const deletingTask = ref<boolean>(false);
 
-  // getter
+  // getters
   const groupedByWeek = computed<WeekGroup[]>(() => {
     const weeksMap: Record<number, { weekLabel: string; dates: any[] }> = {};
     const today = new Date();
@@ -74,7 +83,17 @@ export const useTaskStore = defineStore("taskStore", () => {
     );
   });
 
+  const updatedActiveTaskGroup = computed<string>(() => {
+    return activeTaskGroup.value;
+  });
+
+  const taskActionLoading = computed<boolean>(() => {
+    return creatingTask.value || updatingTask.value || deletingTask.value;
+  });
+
+  // actions
   const getTaskList = async (date: string) => {
+    activeTaskGroup.value = date;
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -90,7 +109,7 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
 
     try {
-      const res: ApiResponseToken = await $fetch(
+      const res: ApiResponseTask = await $fetch(
         `${config.public.apiBase}tasks${query}`,
         {
           headers: {
@@ -115,7 +134,7 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
 
     try {
-      const res: ApiResponseTokenGroup = await $fetch(
+      const res: ApiResponseTaskGroup = await $fetch(
         `${config.public.apiBase}task-groups`,
         {
           headers: {
@@ -131,11 +150,44 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  const createNewTask = async (description: string) => {
+    const token = localStorage.getItem("token");
+    creatingTask.value = true;
+
+    if (!token) {
+      creatingTask.value = false;
+      return;
+    }
+
+    try {
+      const res: ApiCreateTaskResponse = await $fetch(
+        `${config.public.apiBase}tasks`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: {
+            description: description,
+          },
+        }
+      );
+
+      return res.data;
+    } catch (error) {
+      console.error("Error while creating new task: ", error);
+    } finally {
+      creatingTask.value = false;
+    }
+  };
+
   return {
     activeCollection,
     dateGroups,
     groupedByWeek,
+    updatedActiveTaskGroup,
     getTaskList,
     getTaskGroups,
+    createNewTask,
   };
 });

@@ -16,9 +16,11 @@
       class="absolute bottom-0 left-0 w-full p-4 bg-white flex gap-4 items-center h-[50px]"
     >
       <form
+        @submit.prevent="createTask"
         class="border border-gray-200 px-4 py-2 w-full rounded-xl text-sm relative"
       >
         <input
+          v-model="newTask"
           type="text"
           placeholder="What else you need to do?"
           class="w-full outline-none"
@@ -49,17 +51,49 @@
 
 <script setup lang="ts">
 import { useTaskStore } from "~/store/task.store";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { Task } from "~/types/task.type";
+import { useRouter } from "vue-router";
 
 const taskStore = useTaskStore();
+const router = useRouter();
 
 const tasks = computed<Task[]>(() => taskStore.activeCollection);
 
-function toggleTask(id: number) {
+const newTask = ref<string>("");
+const taskCreationError = ref<string>("");
+
+const toggleTask = (id: number) => {
   const task = tasks.value.find((t) => t.id === id);
   if (task) {
     task.done = !task.done;
   }
-}
+};
+
+const createTask = async () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  try {
+    const taskCreationReponse: Task | undefined = await taskStore.createNewTask(
+      newTask.value
+    );
+
+    if (taskCreationReponse) {
+      console.log("taskCreationReponse", taskCreationReponse);
+
+      // if you are not in the current date page, redirect to the current date page to see the updates list
+      // else refetch the task list to update it
+      if (taskStore.updatedActiveTaskGroup != today) {
+        router.push(`/tasks?date=${today}`);
+      } else {
+        taskStore.getTaskList(taskStore.updatedActiveTaskGroup);
+      }
+
+      // clear the new task value
+      newTask.value = "";
+    }
+  } catch (error) {
+    // taskCreationError.value = error?.message;
+  }
+};
 </script>
