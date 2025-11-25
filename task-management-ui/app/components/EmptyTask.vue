@@ -2,10 +2,12 @@
   <div class="h-full flex items-center justify-center w-full">
     <div class="flex flex-col items-center w-full gap-4">
       <p class="font-bold text-2xl">What do you have in mind?</p>
-      <div
+      <form
+        @submit.prevent="createTask"
         class="w-full border border-gray-200 p-4 rounded-xl text-sm relative"
       >
         <textarea
+          v-model="newTask"
           class="w-full outline-none"
           rows="5"
           id=""
@@ -30,13 +32,37 @@
             <path d="M12 19V5" />
           </svg>
         </button>
-      </div>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useTaskStore } from "~/store/task.store";
+import { useRouter } from "vue-router";
+import { ref } from "vue";
+import type { Task } from "~/types/task.type";
 
 const taskStore = useTaskStore();
+const router = useRouter();
+
+const newTask = ref<string>("");
+const taskCreationError = ref<string>("");
+
+const createTask = async () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  try {
+    const taskCreationReponse: Task | undefined = await taskStore.createNewTask(
+      newTask.value
+    );
+
+    if (taskCreationReponse) {
+      router.push(`/tasks?date=${today}`);
+      newTask.value = "";
+    }
+  } catch (error) {
+    // taskCreationError.value = error?.message;
+  }
+};
 </script>
