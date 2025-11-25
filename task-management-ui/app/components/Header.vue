@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex gap-4 py-2 px-4 border-b border-gray-200 h-14 items-center justify-between"
+    class="flex gap-4 py-2 px-4 border-b border-gray-200 h-[60px] items-center justify-between"
   >
     <div class="w-80">
       <img src="~/assets/images/logo.png" alt="logo" class="h-8" />
