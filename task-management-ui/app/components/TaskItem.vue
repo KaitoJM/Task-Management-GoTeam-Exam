@@ -25,9 +25,20 @@
         <path d="M20 6 9 17l-5-5" />
       </svg>
     </button>
-    <p :class="['flex-1 text-sm', props.done ? 'line-through' : '']">
-      <slot></slot>
-    </p>
+    <div
+      @click="handleEditMode"
+      :class="['flex-1 text-sm', props.done ? 'line-through' : '']"
+    >
+      <p v-if="!editMode">{{ props.description }}</p>
+      <input
+        v-else
+        @blur="handleDescriptionUpdate"
+        v-model="editableDescription"
+        ref="inputRef"
+        type="text"
+        class="w-full p-1 border border-gray-300 rounded"
+      />
+    </div>
     <div class="flex justify-end">
       <button
         @click="attemptDelete(props.id)"
@@ -58,19 +69,42 @@
 
 <script setup lang="ts">
 import { useTaskStore } from "~/store/task.store";
-import type { StoreActionResponse } from "~/types/response.type";
+import { ref } from "vue";
 
 interface Props {
-  done: boolean;
   id: number;
+  done: boolean;
+  description: string;
 }
 
 const props = defineProps<Props>();
 const taskStore = useTaskStore();
 
+const editMode = ref<boolean>(false);
+const inputRef = ref<HTMLInputElement | null>(null);
+const editableDescription = ref<string>(props.description);
+
+const handleEditMode = async () => {
+  if (!editMode.value) {
+    editMode.value = true;
+
+    // Wait until DOM updates so input exists
+    await nextTick();
+    inputRef.value?.focus();
+  }
+};
+
 const emit = defineEmits(["toggle"]);
 const handleToggle = () => {
   emit("toggle");
+};
+
+const handleDescriptionUpdate = async () => {
+  await taskStore.updateTask(props.id, {
+    description: editableDescription.value,
+  });
+
+  editMode.value = false;
 };
 
 const attemptDelete = async (id: number) => {

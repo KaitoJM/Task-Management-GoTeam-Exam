@@ -5,11 +5,14 @@
         <TaskItem
           v-for="task in tasks"
           :key="task.id"
-          :done="task.done"
           :id="task.id"
+          :done="task.done"
+          :description="task.description"
           @toggle="toggleTask(task.id)"
         >
-          {{ task.description }}
+          <template>
+            <input v-model="task.description" />
+          </template>
         </TaskItem>
       </ul>
     </div>
