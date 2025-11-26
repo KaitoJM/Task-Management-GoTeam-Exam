@@ -41,6 +41,7 @@ export const useTaskStore = defineStore("taskStore", () => {
   const activeCollection = ref<Task[]>([]);
   const dateGroups = ref<string[]>([]);
   const activeTaskGroup = ref<string>("");
+  const applySort = ref<boolean>(true);
   // loaders
   const loadingGroups = ref<boolean>(false);
   const loadingTasks = ref<boolean>(false);
@@ -126,6 +127,10 @@ export const useTaskStore = defineStore("taskStore", () => {
     return activeTaskGroup.value;
   });
 
+  const sortable = computed<boolean>(() => {
+    return applySort.value;
+  });
+
   const updatedGroupLoading = computed<boolean>(() => {
     return loadingGroups.value;
   });
@@ -162,6 +167,8 @@ export const useTaskStore = defineStore("taskStore", () => {
    * // [{ id: 1, description: 'Task 1', done: true, ... }, ...]
    */
   const getTaskList = async (date: string, applyLoader: boolean = false) => {
+    applySort.value = true; // items should be sortable when getting task list via date
+
     if (applyLoader) {
       loadingTasks.value = true;
     }
@@ -225,6 +232,7 @@ export const useTaskStore = defineStore("taskStore", () => {
    * - Gracefully handles errors by logging and clearing the collection.
    */
   const searchTaskList = async (key: string) => {
+    applySort.value = false; // items should not be sortable when getting task list via search
     loadingTasks.value = true;
     const token = localStorage.getItem("token");
 
@@ -633,6 +641,7 @@ export const useTaskStore = defineStore("taskStore", () => {
     withTodayRecord,
     groupedByWeek,
     updatedActiveTaskGroup,
+    sortable,
     updatedGroupLoading,
     updatedTasksLoading,
     taskActionLoading,

@@ -65,15 +65,16 @@ import TasksLoader from "./loaders/TasksLoader.vue";
 const taskStore = useTaskStore();
 const router = useRouter();
 
-const tasks = computed<Task[]>(() => taskStore.activeCollection);
+let sortablePlugin: Sortable | null;
 
+const tasks = computed<Task[]>(() => taskStore.activeCollection);
 const newTask = ref<string>("");
 const taskCreationError = ref<string>("");
-
 const list = ref<HTMLUListElement | null>(null);
-onMounted(() => {
+
+const applySortable = () => {
   if (list.value) {
-    Sortable.create(list.value, {
+    sortablePlugin = Sortable.create(list.value, {
       animation: 150,
       onEnd: async (event: any) => {
         console.log("Moved item", event);
@@ -92,7 +93,30 @@ onMounted(() => {
       },
     });
   }
+};
+
+const removeSortable = () => {
+  if (sortablePlugin) {
+    sortablePlugin.destroy();
+    sortablePlugin = null;
+  }
+};
+
+onMounted(() => {
+  applySortable();
 });
+
+watch(
+  () => taskStore.sortable,
+  async (newValue, oldValue) => {
+    if (newValue) {
+      applySortable();
+    } else {
+      removeSortable();
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 const toggleTask = async (id: number) => {
   const task = tasks.value.find((t) => t.id === id);
