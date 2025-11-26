@@ -2,7 +2,7 @@ export type Task = {
   id: number;
   description: string;
   done: boolean;
-  sort_order: string;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 };
@@ -10,4 +10,5 @@ export type Task = {
 export type TaskUpdate = {
   description?: string;
   done?: boolean;
+  sort_order?: number;
 };

@@ -1,7 +1,7 @@
 <template>
   <div class="relative h-full">
     <div class="pb-[50px]">
-      <ul class="flex flex-col gap-2">
+      <ul class="flex flex-col gap-2" ref="list">
         <TaskItem
           v-for="task in tasks"
           :key="task.id"
@@ -10,9 +10,6 @@
           :description="task.description"
           @toggle="toggleTask(task.id)"
         >
-          <template>
-            <input v-model="task.description" />
-          </template>
         </TaskItem>
       </ul>
     </div>
@@ -59,6 +56,7 @@ import { computed, ref } from "vue";
 import type { Task } from "~/types/task.type";
 import { useRouter } from "vue-router";
 import type { StoreActionResponse } from "~/types/response.type";
+import Sortable from "sortablejs";
 
 const taskStore = useTaskStore();
 const router = useRouter();
@@ -67,6 +65,34 @@ const tasks = computed<Task[]>(() => taskStore.activeCollection);
 
 const newTask = ref<string>("");
 const taskCreationError = ref<string>("");
+
+const list = ref<HTMLUListElement | null>(null);
+onMounted(() => {
+  if (list.value) {
+    Sortable.create(list.value, {
+      animation: 150,
+      onEnd: async (event: any) => {
+        console.log("Moved item", event);
+
+        const movedItem = tasks.value.splice(event.oldIndex!, 1)[0]; // remove item from old position
+        tasks.value.splice(event.newIndex!, 0, movedItem); // insert at new position
+
+        // Update sort_order accordingly
+        tasks.value.forEach((task, index) => {
+          task.sort_order = index + 1;
+        });
+
+        console.log(
+          "tasks",
+          tasks.value.map((item) => item.id)
+        );
+
+        // Call API to persist new order
+        await updateTaskOrder(tasks.value);
+      },
+    });
+  }
+});
 
 const toggleTask = async (id: number) => {
   const task = tasks.value.find((t) => t.id === id);
@@ -102,6 +128,12 @@ const updateTaskStatus = async (task: Task, status: boolean) => {
     await taskStore.updateTask(task.id, { done: status });
   } catch (error) {
     // taskCreationError.value = error?.message;
+  }
+};
+
+const updateTaskOrder = async (tasks: Task[]) => {
+  for (const task of tasks) {
+    await taskStore.updateTask(task.id, { sort_order: task.sort_order });
   }
 };
 </script>
