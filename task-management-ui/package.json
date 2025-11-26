@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@pinia/nuxt": "0.11.3",
+    "@types/sortablejs": "^1.15.9",
     "@vueuse/core": "^14.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

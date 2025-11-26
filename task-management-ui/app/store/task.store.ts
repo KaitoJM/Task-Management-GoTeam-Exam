@@ -154,6 +154,34 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  const searchTaskList = async (key: string) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      activeCollection.value = [];
+      return;
+    }
+
+    try {
+      const res: ApiResponseTask = await $fetch(
+        `${config.public.apiBase}tasks?search=${key}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      activeCollection.value = res.data.map((task) => ({
+        ...task,
+        done: Boolean(task.done), // need to convert done type to boolean since it is being auto parse an int
+      }));
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+      activeCollection.value = [];
+    }
+  };
+
   /**
    * Fetches the list of task groups from the API and updates the store state.
    *
@@ -499,6 +527,7 @@ export const useTaskStore = defineStore("taskStore", () => {
     groupedByWeek,
     updatedActiveTaskGroup,
     getTaskList,
+    searchTaskList,
     getTaskGroups,
     createNewTask,
     updateTask,

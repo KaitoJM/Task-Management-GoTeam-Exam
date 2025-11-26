@@ -23,7 +23,12 @@
         <path d="m21 21-4.34-4.34" />
         <circle cx="11" cy="11" r="8" />
       </svg>
-      <input type="text" class="flex-1 outline-none" />
+      <input
+        @keyup="handleSearch"
+        type="text"
+        class="flex-1 outline-none"
+        placeholder="Search"
+      />
     </div>
     <div class="w-80 flex justify-end">
       <div
@@ -48,3 +53,27 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import { useTaskStore } from "~/store/task.store";
+
+const taskStore = useTaskStore();
+let debounceTimer: any = null;
+
+const handleSearch = (event: KeyboardEvent) => {
+  const value = (event.target as HTMLInputElement).value;
+
+  // Reset timer every keyup
+  clearTimeout(debounceTimer);
+
+  // Wait one second before executing the search
+  debounceTimer = setTimeout(() => {
+    runSearch(value);
+  }, 1000);
+};
+
+const runSearch = async (text: string) => {
+  await taskStore.searchTaskList(text);
+};
+</script>
