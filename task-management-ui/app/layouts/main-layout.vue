@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Header class="fixed top-0 left-0 w-full bg-white"></Header>
+    <Header class="fixed top-0 left-0 w-full bg-white z-20"></Header>
     <div class="p-4 flex-1 flex gap-4 pt-18 h-[100vh]">
       <div class="w-[300px] pr-[50px] h-full max-h-[100vh] overflow-y-auto">
         <TaskDateSelection></TaskDateSelection>
