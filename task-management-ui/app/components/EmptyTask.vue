@@ -1,6 +1,6 @@
 <template>
   <div class="h-full flex items-center justify-center w-full">
-    <div class="flex flex-col items-center w-full gap-4">
+    <div class="flex flex-col items-center w-full gap-4 max-w-[700px] mx-auto">
       <p class="font-bold text-2xl">What do you have in mind?</p>
       <form
         @submit.prevent="createTask"

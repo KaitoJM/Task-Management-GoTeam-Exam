@@ -1,25 +1,27 @@
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex-1 max-h-full overflow-auto px-4 relative">
-      <TasksLoader v-show="taskStore.updatedTasksLoading"></TasksLoader>
-      <ul
-        v-show="!taskStore.updatedTasksLoading"
-        class="flex flex-col gap-2"
-        ref="list"
-      >
-        <TaskItem
-          v-for="task in tasks"
-          :key="task.id"
-          :id="task.id"
-          :done="task.done"
-          :description="task.description"
-          @toggle="toggleTask(task.id)"
+    <div class="flex-1 max-h-full overflow-auto px-4 relativ p-4">
+      <div class="max-w-[700px] mx-auto">
+        <TasksLoader v-show="taskStore.updatedTasksLoading"></TasksLoader>
+        <ul
+          v-show="!taskStore.updatedTasksLoading"
+          class="flex flex-col gap-2"
+          ref="list"
         >
-        </TaskItem>
-      </ul>
+          <TaskItem
+            v-for="task in tasks"
+            :key="task.id"
+            :id="task.id"
+            :done="task.done"
+            :description="task.description"
+            @toggle="toggleTask(task.id)"
+          >
+          </TaskItem>
+        </ul>
+      </div>
     </div>
     <div class="w-full p-4 bg-white flex gap-4 items-center h-[70px]">
-      <CreateTaskForm></CreateTaskForm>
+      <CreateTaskForm class="max-w-[700px] mx-auto"></CreateTaskForm>
     </div>
   </div>
 </template>
