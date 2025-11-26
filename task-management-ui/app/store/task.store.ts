@@ -88,6 +88,24 @@ export const useTaskStore = defineStore("taskStore", () => {
     );
   });
 
+  const updatedDateGroups = computed<string[]>(() => {
+    return dateGroups.value;
+  });
+
+  const withTodayRecord = computed<boolean>(() => {
+    const today = new Date().toISOString().split("T")[0];
+
+    if (
+      today &&
+      updatedDateGroups.value.length &&
+      updatedDateGroups.value.includes(today)
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+
   const updatedActiveTaskGroup = computed<string>(() => {
     return activeTaskGroup.value;
   });
@@ -154,6 +172,27 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  /**
+   * Searches the authenticated user's tasks based on the provided keyword.
+   *
+   * This function makes a GET request to the `/tasks` endpoint with a search query,
+   * using the stored authentication token. If the token is missing, it clears the
+   * active task collection. The returned tasks are normalized before being stored.
+   *
+   * @async
+   * @function searchTaskList
+   * @param {string} key - The search keyword used to filter tasks.
+   *
+   * @returns {Promise<void>} Resolves when the task list has been successfully
+   *                          updated or cleared on error.
+   *
+   * @description
+   * - Retrieves the user's token from `localStorage`.
+   * - If no token exists, resets the active collection.
+   * - Sends an authenticated request to fetch tasks matching the search key.
+   * - Converts the `done` field to boolean because the API returns it as an integer.
+   * - Gracefully handles errors by logging and clearing the collection.
+   */
   const searchTaskList = async (key: string) => {
     const token = localStorage.getItem("token");
 
@@ -284,6 +323,7 @@ export const useTaskStore = defineStore("taskStore", () => {
       creatingTask.value = false;
 
       //refresh task list
+      getTaskGroups();
       if (updatedActiveTaskGroup.value) {
         getTaskList(updatedActiveTaskGroup.value);
       }
@@ -438,7 +478,8 @@ export const useTaskStore = defineStore("taskStore", () => {
       deletingTask.value = false;
 
       if (statusCode == 204) {
-        //refresh task list
+        //refresh task list and task group
+        getTaskGroups();
         getTaskList(updatedActiveTaskGroup.value);
 
         return {
@@ -524,6 +565,8 @@ export const useTaskStore = defineStore("taskStore", () => {
   return {
     activeCollection,
     dateGroups,
+    updatedDateGroups,
+    withTodayRecord,
     groupedByWeek,
     updatedActiveTaskGroup,
     getTaskList,

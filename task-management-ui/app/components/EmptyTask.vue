@@ -58,7 +58,7 @@ const createTask = async () => {
       await taskStore.createNewTask(newTask.value);
 
     if (taskCreationReponse.success) {
-      router.push(`/tasks?date=${today}`);
+      // router.push(`/tasks?date=${today}`);
       newTask.value = "";
     }
   } catch (error) {
