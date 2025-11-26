@@ -14,9 +14,11 @@
           placeholder="Write the task you plan to do today here..."
         ></textarea>
         <button
+          :disabled="taskStore.updatedCreatingTasksLoading"
           class="w-[35px] h-[35px] rounded-full bg-black text-white absolute bottom-2 right-2 flex items-center justify-center"
         >
           <svg
+            v-if="!taskStore.updatedCreatingTasksLoading"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -30,6 +32,21 @@
           >
             <path d="m5 12 7-7 7 7" />
             <path d="M12 19V5" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-loader-circle-icon lucide-loader-circle size-5 animate-spin"
+          >
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
         </button>
       </form>

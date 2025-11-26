@@ -139,6 +139,10 @@ export const useTaskStore = defineStore("taskStore", () => {
     return loadingTasks.value;
   });
 
+  const updatedCreatingTasksLoading = computed<boolean>(() => {
+    return creatingTask.value;
+  });
+
   const taskActionLoading = computed<boolean>(() => {
     return creatingTask.value || updatingTask.value || deletingTask.value;
   });
@@ -644,6 +648,7 @@ export const useTaskStore = defineStore("taskStore", () => {
     sortable,
     updatedGroupLoading,
     updatedTasksLoading,
+    updatedCreatingTasksLoading,
     taskActionLoading,
     getTaskList,
     searchTaskList,
