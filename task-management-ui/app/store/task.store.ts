@@ -96,7 +96,28 @@ export const useTaskStore = defineStore("taskStore", () => {
     return creatingTask.value || updatingTask.value || deletingTask.value;
   });
 
-  // actions
+  /**
+   * Fetches the list of tasks for a specific date from the API and updates the store state.
+   *
+   * This function will:
+   * 1. Set the currently active task group to the provided date.
+   * 2. Check if a valid API token exists in localStorage.
+   * 3. Build a query string to filter tasks by the given `date`.
+   * 4. Send a GET request to fetch tasks from the API.
+   * 5. Convert the `done` property of each task to a boolean.
+   * 6. Update the `activeCollection` state with the fetched tasks.
+   * 7. If an error occurs or token is missing, it will reset `activeCollection` to an empty array.
+   *
+   * @async
+   * @function
+   * @param {string} date - The date string in `YYYY-MM-DD` format to filter tasks by.
+   * @returns {Promise<void>} A promise that resolves when the tasks are fetched and state is updated.
+   *
+   * @example
+   * await getTaskList('2025-11-25');
+   * console.log(activeCollection.value);
+   * // [{ id: 1, description: 'Task 1', done: true, ... }, ...]
+   */
   const getTaskList = async (date: string) => {
     activeTaskGroup.value = date;
     const token = localStorage.getItem("token");
@@ -133,6 +154,23 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  /**
+   * Fetches the list of task groups from the API and updates the store state.
+   *
+   * This function will:
+   * 1. Check if a valid API token exists in localStorage.
+   * 2. Send a GET request to fetch task groups from the API.
+   * 3. Update the `dateGroups` state with the fetched data.
+   * 4. If an error occurs or token is missing, it will reset `dateGroups` to an empty array.
+   *
+   * @async
+   * @function
+   * @returns {Promise<void>} A promise that resolves when the task groups are fetched and state is updated.
+   *
+   * @example
+   * await getTaskGroups();
+   * console.log(dateGroups.value); // ['2025-11-28', '2025-11-27', ...]
+   */
   const getTaskGroups = async () => {
     const token = localStorage.getItem("token");
 
@@ -158,6 +196,29 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  /**
+   * Creates a new task with the given description.
+   *
+   * This function will:
+   * 1. Check if a valid API token exists in localStorage.
+   * 2. Send a POST request to the API to create the task.
+   * 3. Update the task list for the current active task group if available.
+   * 4. Return a standardized `StoreActionResponse` indicating success or failure.
+   *
+   * @param {string} description - The description of the new task to create.
+   * @returns {Promise<StoreActionResponse>} A promise resolving to an object containing:
+   *   - success: boolean — Whether the task creation was successful.
+   *   - message: string — A human-readable message describing the result.
+   *   - statusCode: number — The HTTP status code returned from the API or error code.
+   *
+   * @example
+   * const response = await createNewTask("Finish writing report");
+   * if (response.success) {
+   *   console.log(response.message);
+   * } else {
+   *   console.error(response.message);
+   * }
+   */
   const createNewTask = async (
     description: string
   ): Promise<StoreActionResponse> => {
@@ -217,6 +278,30 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  /**
+   * Updates a task by its ID using the API endpoint.
+   *
+   * This function sends a PATCH request to the backend with updated task data.
+   * It also manages UI state by toggling `updatingTask` and refreshing the active
+   * task list once the update is completed.
+   *
+   * ### Behavior:
+   * - Validates authentication by checking for an access token.
+   * - Sends a PATCH request with the updated task fields.
+   * - Captures the HTTP status via `onResponse` because Nuxt's `$fetch`
+   *   wraps responses and does not expose raw status codes directly.
+   * - Refreshes the active task list after a successful update.
+   * - Returns a standardized `StoreActionResponse` indicating success or failure.
+   *
+   * @param {number} id - The ID of the task to update.
+   * @param {TaskUpdate} form - The data payload containing updated task fields.
+   * @returns {Promise<StoreActionResponse>} A promise resolving with the result of the update action.
+   *
+   * @typedef {Object} StoreActionResponse
+   * @property {boolean} success - Whether the action succeeded.
+   * @property {string} message - Descriptive message for UI feedback.
+   * @property {number} statusCode - The HTTP status code returned by the API.
+   */
   const updateTask = async (
     id: number,
     form: TaskUpdate
@@ -273,6 +358,30 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  /**
+   * Deletes a task by its ID using the API endpoint.
+   *
+   * This function sends a DELETE request to the backend to permanently remove a task.
+   * It also updates UI state by setting `deletingTask` and refreshing the task list
+   * when the deletion is successful.
+   *
+   * ### Behavior:
+   * - If no authentication token is found, returns an unauthorized response.
+   * - Sends a DELETE request to the `/tasks/:id` endpoint.
+   * - Uses `onResponse` to capture the raw HTTP status code (important because 204
+   *   responses contain no JSON body).
+   * - If deletion succeeds (`204`), it refreshes the active task list.
+   * - Handles all network and API errors gracefully and returns a standardized
+   *   `StoreActionResponse`.
+   *
+   * @param {number} id - The ID of the task to delete.
+   * @returns {Promise<StoreActionResponse>} A promise resolving with the result of the deletion action.
+   *
+   * @typedef {Object} StoreActionResponse
+   * @property {boolean} success - Indicates whether the operation succeeded.
+   * @property {string} message - A user-friendly message describing the result.
+   * @property {number} statusCode - The HTTP status code returned by the API.
+   */
   const deleteTask = async (id: number): Promise<StoreActionResponse> => {
     const token = localStorage.getItem("token");
     deletingTask.value = true;
