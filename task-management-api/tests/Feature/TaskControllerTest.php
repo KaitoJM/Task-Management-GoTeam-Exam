@@ -308,3 +308,68 @@ describe('Delete Task', function () {
         ]);
     });
 });
+
+describe('Sort Tasks', function() {
+    it('updates the sort order of the tasks successfully using the given array of task ids in designated order.', function() {
+        $user = User::factory()->create();
+
+        // Create 5 tasks and get their IDs
+        $tasks = Task::factory(5)->create(['user_id' => $user->id]);
+
+        $payload = [
+            'taskIds' => [
+                $tasks[2]->id, // 3rd task first
+                $tasks[1]->id, // 2nd task second
+                $tasks[3]->id, // 4th task third
+                $tasks[0]->id, // 1st task fourth
+                $tasks[4]->id, // 5th task last
+            ],
+        ];
+
+        $response = actingAs($user)->patchJson("/api/tasks-reorder", $payload);
+
+        $response->assertStatus(204);
+
+        // Refresh tasks from database to check sort_order
+        $tasks->each(fn($task) => $task->refresh());
+
+        // Assert that sort_order matches the index in payload
+        foreach ($payload['taskIds'] as $index => $taskId) {
+            $task = Task::find($taskId);
+            $this->assertEquals($index, $task->sort_order);
+        }
+    });
+
+    it('returns a 403 error if 1 or more of the task Ids doesnt belong the authenticated user.', function() {
+        $user = User::factory()->create();
+        $tasks = Task::factory(5)->create(['user_id' => $user->id]);
+
+        $user2 = User::factory()->create();
+        $tasks2 = Task::factory(5)->create(['user_id' => $user2->id]);
+
+        $payload = [
+            'taskIds' => [
+                $tasks2[2]->id, // task of not authenticated user
+                $tasks[1]->id,
+                $tasks2[3]->id, // task of not authenticated user
+                $tasks[0]->id,
+                $tasks[4]->id,
+            ],
+        ];
+
+        $response = actingAs($user)->patchJson("/api/tasks-reorder", $payload);
+
+        $response->assertStatus(403);
+    });
+
+    it('returns a 422 error if there is a non numeric data in the set of task ids.', function() {
+        $payload = [
+            'taskIds' => ['non numeric', 1, 2, 5],
+        ];
+
+        $user = User::factory()->create();
+        $response = actingAs($user)->patchJson("/api/tasks-reorder", $payload);
+
+        $response->assertStatus(422);
+    });
+});
