@@ -153,6 +153,7 @@ export const useTaskStore = defineStore("taskStore", () => {
    * @async
    * @function
    * @param {string} date - The date string in `YYYY-MM-DD` format to filter tasks by.
+   * @param {boolean} applyLoader - use for loader indication defaul value is false.
    * @returns {Promise<void>} A promise that resolves when the tasks are fetched and state is updated.
    *
    * @example
@@ -224,6 +225,7 @@ export const useTaskStore = defineStore("taskStore", () => {
    * - Gracefully handles errors by logging and clearing the collection.
    */
   const searchTaskList = async (key: string) => {
+    loadingTasks.value = true;
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -241,12 +243,14 @@ export const useTaskStore = defineStore("taskStore", () => {
         }
       );
 
+      loadingTasks.value = false;
       activeCollection.value = res.data.map((task) => ({
         ...task,
         done: Boolean(task.done), // need to convert done type to boolean since it is being auto parse an int
       }));
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
+      loadingTasks.value = false;
       activeCollection.value = [];
     }
   };
