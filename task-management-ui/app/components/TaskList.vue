@@ -1,6 +1,6 @@
 <template>
-  <div class="relative h-full">
-    <div class="pb-[50px]">
+  <div class="flex flex-col h-full">
+    <div class="flex-1 max-h-full overflow-auto px-4">
       <ul class="flex flex-col gap-2" ref="list">
         <TaskItem
           v-for="task in tasks"
@@ -13,9 +13,7 @@
         </TaskItem>
       </ul>
     </div>
-    <div
-      class="absolute bottom-0 left-0 w-full p-4 bg-white flex gap-4 items-center h-[50px]"
-    >
+    <div class="w-full p-4 bg-white flex gap-4 items-center h-[70px]">
       <form
         @submit.prevent="createTask"
         class="border border-gray-200 px-4 py-2 w-full rounded-xl text-sm relative"
