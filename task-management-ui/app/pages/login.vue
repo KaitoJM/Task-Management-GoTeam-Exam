@@ -14,6 +14,7 @@
             <label for="" class="text-xs text-gray-800">Email</label>
             <input
               v-model="email"
+              tabindex="1"
               type="text"
               class="border border-gray-200 px-4 py-1 w-full rounded-xl text-sm"
             />
@@ -21,10 +22,11 @@
           <div class="flex flex-col gap-1">
             <div class="text-xs text-gray-800 flex justify-between">
               <label for="">Password</label>
-              <a href="#">Forgot your password?</a>
+              <a href="#" tabindex="4">Forgot your password?</a>
             </div>
             <input
               v-model="password"
+              tabindex="1"
               type="password"
               class="border border-gray-200 px-4 py-1 w-full rounded-xl text-sm"
             />
@@ -37,6 +39,7 @@
 
           <button
             :disabled="loading"
+            tabindex="3"
             class="py-2 px-2 text-xs bg-black text-white rounded-xl mt-2 mb-8"
           >
             <span v-if="loading">Loading...</span>
