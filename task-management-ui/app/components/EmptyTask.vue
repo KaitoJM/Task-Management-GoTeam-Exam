@@ -42,6 +42,7 @@ import { useTaskStore } from "~/store/task.store";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import type { Task } from "~/types/task.type";
+import type { StoreActionResponse } from "~/types/response.type";
 
 const taskStore = useTaskStore();
 const router = useRouter();
@@ -53,11 +54,10 @@ const createTask = async () => {
   const today = new Date().toISOString().split("T")[0];
 
   try {
-    const taskCreationReponse: Task | undefined = await taskStore.createNewTask(
-      newTask.value
-    );
+    const taskCreationReponse: StoreActionResponse =
+      await taskStore.createNewTask(newTask.value);
 
-    if (taskCreationReponse) {
+    if (taskCreationReponse.success) {
       router.push(`/tasks?date=${today}`);
       newTask.value = "";
     }

@@ -6,6 +6,7 @@
           v-for="task in tasks"
           :key="task.id"
           :done="task.done"
+          :id="task.id"
           @toggle="toggleTask(task.id)"
         >
           {{ task.description }}
@@ -54,6 +55,7 @@ import { useTaskStore } from "~/store/task.store";
 import { computed, ref } from "vue";
 import type { Task } from "~/types/task.type";
 import { useRouter } from "vue-router";
+import type { StoreActionResponse } from "~/types/response.type";
 
 const taskStore = useTaskStore();
 const router = useRouter();
@@ -75,19 +77,13 @@ const createTask = async () => {
   const today = new Date().toISOString().split("T")[0];
 
   try {
-    const taskCreationReponse: Task | undefined = await taskStore.createNewTask(
-      newTask.value
-    );
+    const taskCreationReponse: StoreActionResponse =
+      await taskStore.createNewTask(newTask.value);
 
-    if (taskCreationReponse) {
-      console.log("taskCreationReponse", taskCreationReponse);
-
+    if (taskCreationReponse.success) {
       // if you are not in the current date page, redirect to the current date page to see the updates list
-      // else refetch the task list to update it
       if (taskStore.updatedActiveTaskGroup != today) {
         router.push(`/tasks?date=${today}`);
-      } else {
-        taskStore.getTaskList(taskStore.updatedActiveTaskGroup);
       }
 
       // clear the new task value
@@ -100,15 +96,7 @@ const createTask = async () => {
 
 const updateTaskStatus = async (task: Task, status: boolean) => {
   try {
-    const taskCreationReponse: Task | undefined = await taskStore.updateTask(
-      task.id,
-      { done: status }
-    );
-
-    if (taskCreationReponse) {
-      // refresh the task list to update it
-      taskStore.getTaskList(taskStore.updatedActiveTaskGroup);
-    }
+    await taskStore.updateTask(task.id, { done: status });
   } catch (error) {
     // taskCreationError.value = error?.message;
   }

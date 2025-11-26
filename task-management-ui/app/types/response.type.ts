@@ -9,4 +9,11 @@ export type ApiError = {
 
 export type ApiResponse = {
   data: any;
+  statusCode: number;
+};
+
+export type StoreActionResponse = {
+  success: boolean;
+  message: string;
+  statusCode: number;
 };

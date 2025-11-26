@@ -29,7 +29,10 @@
       <slot></slot>
     </p>
     <div class="flex justify-end">
-      <button class="opacity-0 group-hover:opacity-100">
+      <button
+        @click="attemptDelete(props.id)"
+        class="opacity-0 group-hover:opacity-100"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -54,14 +57,29 @@
 </template>
 
 <script setup lang="ts">
+import { useTaskStore } from "~/store/task.store";
+import type { StoreActionResponse } from "~/types/response.type";
+
 interface Props {
   done: boolean;
+  id: number;
 }
 
 const props = defineProps<Props>();
+const taskStore = useTaskStore();
 
 const emit = defineEmits(["toggle"]);
 const handleToggle = () => {
   emit("toggle");
+};
+
+const attemptDelete = async (id: number) => {
+  const ans: boolean = confirm("Are you sure you want to delete this task?");
+
+  if (ans) {
+    try {
+      await taskStore.deleteTask(id);
+    } catch (error) {}
+  }
 };
 </script>

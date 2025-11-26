@@ -5,6 +5,11 @@ import {
   isYesterday,
   parseISO,
 } from "date-fns";
+import type {
+  ApiError,
+  ApiResponse,
+  StoreActionResponse,
+} from "~/types/response.type";
 import type { Task, TaskUpdate } from "~/types/task.type";
 
 const config = useRuntimeConfig();
@@ -118,7 +123,10 @@ export const useTaskStore = defineStore("taskStore", () => {
         }
       );
 
-      activeCollection.value = res.data;
+      activeCollection.value = res.data.map((task) => ({
+        ...task,
+        done: Boolean(task.done), // need to convert done type to boolean since it is being auto parse an int
+      }));
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
       activeCollection.value = [];
@@ -150,16 +158,24 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
-  const createNewTask = async (description: string) => {
+  const createNewTask = async (
+    description: string
+  ): Promise<StoreActionResponse> => {
     const token = localStorage.getItem("token");
     creatingTask.value = true;
 
     if (!token) {
       creatingTask.value = false;
-      return;
+      return {
+        success: false,
+        message: `You are not allowed to do this function.`,
+        statusCode: 401,
+      };
     }
 
     try {
+      let statusCode = 0;
+
       const res: ApiCreateTaskResponse = await $fetch(
         `${config.public.apiBase}tasks`,
         {
@@ -170,28 +186,57 @@ export const useTaskStore = defineStore("taskStore", () => {
           body: {
             description: description,
           },
+          onResponse({ response }) {
+            statusCode = response.status;
+          },
         }
       );
 
-      return res.data;
-    } catch (error) {
-      console.error("Error while creating new task: ", error);
-    } finally {
       creatingTask.value = false;
+
+      //refresh task list
+      if (updatedActiveTaskGroup.value) {
+        getTaskList(updatedActiveTaskGroup.value);
+      }
+
+      return {
+        success: true,
+        message: `Sucessfully added new entry on the tasks list.`,
+        statusCode: statusCode,
+      };
+    } catch (err) {
+      creatingTask.value = false;
+      const error = err as ApiError;
+      console.error("Error while creating new task: ", error);
+
+      return {
+        success: false,
+        message: `An error occured white creating a task.`,
+        statusCode: error.statusCode || 500,
+      };
     }
   };
 
-  const updateTask = async (id: number, form: TaskUpdate) => {
+  const updateTask = async (
+    id: number,
+    form: TaskUpdate
+  ): Promise<StoreActionResponse> => {
     const token = localStorage.getItem("token");
     updatingTask.value = true;
 
     if (!token) {
       updatingTask.value = false;
-      return;
+      return {
+        success: false,
+        message: `You are not allowed to do this function.`,
+        statusCode: 401,
+      };
     }
 
     try {
-      const res: ApiCreateTaskResponse = await $fetch(
+      let statusCode = 0;
+
+      const res: ApiResponse = await $fetch(
         `${config.public.apiBase}tasks/${id}`,
         {
           method: "PATCH",
@@ -199,14 +244,88 @@ export const useTaskStore = defineStore("taskStore", () => {
             Authorization: `Bearer ${token}`,
           },
           body: form,
+          onResponse({ response }) {
+            statusCode = response.status;
+          },
         }
       );
 
-      return res.data;
-    } catch (error) {
-      console.error("Error while updating task: ", error);
-    } finally {
       updatingTask.value = false;
+
+      //refresh task list
+      getTaskList(updatedActiveTaskGroup.value);
+
+      return {
+        success: true,
+        message: `Task with id ${id} has been successfully updated.`,
+        statusCode: statusCode,
+      };
+    } catch (err) {
+      updatingTask.value = false;
+      const error = err as ApiError;
+      console.error("Error while updating task: ", error);
+
+      return {
+        success: false,
+        message: `An error occured white updating a task.`,
+        statusCode: error.statusCode || 500,
+      };
+    }
+  };
+
+  const deleteTask = async (id: number): Promise<StoreActionResponse> => {
+    const token = localStorage.getItem("token");
+    deletingTask.value = true;
+
+    if (!token) {
+      deletingTask.value = false;
+      return {
+        success: false,
+        message: `You are not allowed to do this function.`,
+        statusCode: 401,
+      };
+    }
+
+    try {
+      let statusCode = 0;
+      await $fetch(`${config.public.apiBase}tasks/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        onResponse({ response }) {
+          statusCode = response.status;
+        },
+      });
+
+      deletingTask.value = false;
+
+      if (statusCode == 204) {
+        //refresh task list
+        getTaskList(updatedActiveTaskGroup.value);
+
+        return {
+          success: true,
+          message: `Task with id ${id} has been successfully deleted.`,
+          statusCode: statusCode,
+        };
+      }
+
+      return {
+        success: false,
+        message: `An error occured white deleting a task.`,
+        statusCode: statusCode,
+      };
+    } catch (err) {
+      deletingTask.value = false;
+      const error = err as ApiError;
+      console.error("Error while deleting task: ", error);
+
+      return {
+        success: false,
+        message: `An error occured white deleting a task.`,
+        statusCode: error.statusCode || 500,
+      };
     }
   };
 
@@ -219,5 +338,6 @@ export const useTaskStore = defineStore("taskStore", () => {
     getTaskGroups,
     createNewTask,
     updateTask,
+    deleteTask,
   };
 });
