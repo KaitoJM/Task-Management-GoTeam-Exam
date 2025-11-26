@@ -404,15 +404,13 @@ export const useTaskStore = defineStore("taskStore", () => {
    * Updates a task by its ID using the API endpoint.
    *
    * This function sends a PATCH request to the backend with updated task data.
-   * It also manages UI state by toggling `updatingTask` and refreshing the active
-   * task list once the update is completed.
+   * It also manages UI state by toggling `updatingTask`
    *
    * ### Behavior:
    * - Validates authentication by checking for an access token.
    * - Sends a PATCH request with the updated task fields.
    * - Captures the HTTP status via `onResponse` because Nuxt's `$fetch`
    *   wraps responses and does not expose raw status codes directly.
-   * - Refreshes the active task list after a successful update.
    * - Returns a standardized `StoreActionResponse` indicating success or failure.
    *
    * @param {number} id - The ID of the task to update.
@@ -459,8 +457,20 @@ export const useTaskStore = defineStore("taskStore", () => {
 
       updatingTask.value = false;
 
-      //refresh task list
-      getTaskList(updatedActiveTaskGroup.value);
+      // update current item values
+      const editedTask: Task | undefined = activeCollection.value.find(
+        (item) => item.id == id
+      );
+
+      if (editedTask) {
+        if (form.description) {
+          editedTask.description = form.description;
+        }
+
+        if (form.done) {
+          editedTask.done = form.done;
+        }
+      }
 
       return {
         success: true,
@@ -484,15 +494,12 @@ export const useTaskStore = defineStore("taskStore", () => {
    * Deletes a task by its ID using the API endpoint.
    *
    * This function sends a DELETE request to the backend to permanently remove a task.
-   * It also updates UI state by setting `deletingTask` and refreshing the task list
-   * when the deletion is successful.
    *
    * ### Behavior:
    * - If no authentication token is found, returns an unauthorized response.
    * - Sends a DELETE request to the `/tasks/:id` endpoint.
    * - Uses `onResponse` to capture the raw HTTP status code (important because 204
    *   responses contain no JSON body).
-   * - If deletion succeeds (`204`), it refreshes the active task list.
    * - Handles all network and API errors gracefully and returns a standardized
    *   `StoreActionResponse`.
    *
@@ -532,9 +539,16 @@ export const useTaskStore = defineStore("taskStore", () => {
       deletingTask.value = false;
 
       if (statusCode == 204) {
-        //refresh task list and task group
+        //refresh task group
         getTaskGroups();
-        getTaskList(updatedActiveTaskGroup.value);
+
+        // find the index of the deleted item in active collection
+        const deletedIndex: number = activeCollection.value.findIndex(
+          (item) => item.id === id
+        );
+
+        // remove current item in the activeCollection
+        activeCollection.value.splice(deletedIndex, 1);
 
         return {
           success: true,
