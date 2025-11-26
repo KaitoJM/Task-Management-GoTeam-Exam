@@ -21,9 +21,18 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Create 10 tasks linked to the created user
-        Task::factory(10)->create([
+        $user2 = User::factory()->create([
+            'name' => 'Test User 2',
+            'email' => 'test2@example.com',
+        ]);
+
+        // Create 40 tasks linked to the created user
+        Task::factory(40)->create([
             'user_id' => $user->id
+        ]);
+
+        Task::factory(40)->create([
+            'user_id' => $user2->id
         ]);
     }
 }

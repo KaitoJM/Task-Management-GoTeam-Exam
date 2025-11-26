@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskRequest;
 use App\Http\Requests\FilterTaskRequest;
+use App\Http\Requests\SortTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
@@ -34,6 +35,9 @@ class TaskController extends Controller
         if ($request->filled('search')) {
             $query->where('description', 'LIKE', '%' . $request->search . '%');
         }
+
+        // Sort by sort_order ascending
+        $query->orderBy('sort_order', 'asc');
 
         // Process query
         $tasks = $query->get();
@@ -93,7 +97,7 @@ class TaskController extends Controller
             ->firstOrFail();
 
         // Only update fields that exist in the request
-        $task->update($request->only(['description', 'done']));
+        $task->update($request->only(['description', 'done', 'sort_order']));
 
         // Return the updated task data
         return (new TaskResource($task))
@@ -116,6 +120,31 @@ class TaskController extends Controller
 
         // Process task deletion
         $task->delete();
+
+        return response()->noContent(); // 204 response
+    }
+
+    public function sort(SortTaskRequest $request)
+    {
+        $ids = $request->taskIds;
+        // Get authenticated user's ID
+        $userId = Auth::id();
+
+        // Ensure only owner can update
+        $tasks = Task::whereIn('id', $ids)
+            ->where('user_id', $userId)
+            ->get();
+
+        // Check if all requested IDs exist for this user
+        if ($tasks->count() !== count($ids)) {
+            abort(403, 'One or more tasks do not belong to the authenticated user.');
+        }
+
+        // Only update fields that exist in the request
+        foreach($ids as $indx => $id) {
+            $task = Task::where('id', $id)->firstOrFail();
+            $task->update(['sort_order' => $indx]);
+        }
 
         return response()->noContent(); // 204 response
     }

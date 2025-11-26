@@ -438,6 +438,61 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  const sortTask = async (taskIds: number[]): Promise<StoreActionResponse> => {
+    const token = localStorage.getItem("token");
+    updatingTask.value = true;
+
+    if (!token) {
+      updatingTask.value = false;
+      return {
+        success: false,
+        message: `You are not allowed to do this function.`,
+        statusCode: 401,
+      };
+    }
+
+    try {
+      let statusCode = 0;
+
+      const res: ApiResponse = await $fetch(
+        `${config.public.apiBase}tasks-reorder`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: {
+            taskIds: taskIds,
+          },
+          onResponse({ response }) {
+            statusCode = response.status;
+          },
+        }
+      );
+
+      updatingTask.value = false;
+
+      //refresh task list
+      getTaskList(updatedActiveTaskGroup.value);
+
+      return {
+        success: true,
+        message: `Task has been successfully resorted.`,
+        statusCode: statusCode,
+      };
+    } catch (err) {
+      updatingTask.value = false;
+      const error = err as ApiError;
+      console.error("Error while sorting task: ", error);
+
+      return {
+        success: false,
+        message: `An error occured white sorting a task.`,
+        statusCode: error.statusCode || 500,
+      };
+    }
+  };
+
   return {
     activeCollection,
     dateGroups,
@@ -448,5 +503,6 @@ export const useTaskStore = defineStore("taskStore", () => {
     createNewTask,
     updateTask,
     deleteTask,
+    sortTask,
   };
 });

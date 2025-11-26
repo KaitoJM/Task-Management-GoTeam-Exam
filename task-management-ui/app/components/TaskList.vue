@@ -74,21 +74,17 @@ onMounted(() => {
       onEnd: async (event: any) => {
         console.log("Moved item", event);
 
-        const movedItem = tasks.value.splice(event.oldIndex!, 1)[0]; // remove item from old position
-        tasks.value.splice(event.newIndex!, 0, movedItem); // insert at new position
+        const movedItem: Task | null =
+          tasks.value.splice(event.oldIndex!, 1)[0] || null; // remove item from old position
+        if (movedItem) {
+          tasks.value.splice(event.newIndex!, 0, movedItem); // insert at new position
+        }
 
-        // Update sort_order accordingly
-        tasks.value.forEach((task, index) => {
-          task.sort_order = index + 1;
-        });
-
-        console.log(
-          "tasks",
-          tasks.value.map((item) => item.id)
-        );
+        const newOrder: number[] = tasks.value.map((item) => item.id);
+        console.log("newOrder", newOrder);
 
         // Call API to persist new order
-        await updateTaskOrder(tasks.value);
+        await updateTaskOrder(newOrder);
       },
     });
   }
@@ -131,9 +127,7 @@ const updateTaskStatus = async (task: Task, status: boolean) => {
   }
 };
 
-const updateTaskOrder = async (tasks: Task[]) => {
-  for (const task of tasks) {
-    await taskStore.updateTask(task.id, { sort_order: task.sort_order });
-  }
+const updateTaskOrder = async (newOrder: number[]) => {
+  await taskStore.sortTask(newOrder);
 };
 </script>

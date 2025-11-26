@@ -22,7 +22,7 @@ class FilterTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'created_at' => 'sometimes|date',
+            'created_at_date' => 'sometimes|date',
             'search' => 'sometimes',
         ];
     }

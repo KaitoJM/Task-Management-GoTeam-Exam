@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateTaskRequest extends FormRequest
+class SortTaskRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,8 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'description' => 'sometimes|string',
-            'done' => 'sometimes|boolean',
-            'sort_order' => 'sometimes|numeric',
+            'taskIds' => 'required|array',
+            'taskIds.*' => 'integer', // each element in the array must be an integer
         ];
     }
 }

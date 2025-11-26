@@ -28,6 +28,6 @@ class TaskFactory extends Factory
 
     private function randomDate()
     {
-        return fake()->dateTimeBetween('2025-11-24', '2025-11-29');
+        return fake()->dateTimeBetween('2025-11-1', date('Y-m-d'));
     }
 }

@@ -11,6 +11,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/users', [UserController::class, 'index']);
 Route::apiResource('/tasks', TaskController::class)->middleware('auth:sanctum');
 Route::get('/task-groups', [TaskGroupController::class, 'index'])->middleware('auth:sanctum');
+Route::patch('/tasks-reorder', [TaskController::class, 'sort'])->middleware('auth:sanctum');
 
 Route::get('/user', function (Request $request) {
     return $request->user();

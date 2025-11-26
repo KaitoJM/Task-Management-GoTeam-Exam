@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->text('description');
             $table->boolean('done')->default(false);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }
