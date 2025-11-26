@@ -1,6 +1,8 @@
 <template>
   <div class="flex flex-col gap-4 text-sm">
+    <GroupLoader v-if="taskStore.updatedGroupLoading"></GroupLoader>
     <div
+      v-else
       v-for="(group, indx) in taskStore.groupedByWeek"
       :key="`week-group-${indx}`"
     >
@@ -23,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import GroupLoader from "./loaders/GroupLoader.vue";
 import TaskDateItem from "./TaskDateItem.vue";
 import { useTaskStore } from "~/store/task.store";
 

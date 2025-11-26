@@ -42,6 +42,8 @@ export const useTaskStore = defineStore("taskStore", () => {
   const dateGroups = ref<string[]>([]);
   const activeTaskGroup = ref<string>("");
   // loaders
+  const loadingGroups = ref<boolean>(false);
+  const loadingTasks = ref<boolean>(false);
   const creatingTask = ref<boolean>(false);
   const updatingTask = ref<boolean>(false);
   const deletingTask = ref<boolean>(false);
@@ -122,6 +124,14 @@ export const useTaskStore = defineStore("taskStore", () => {
 
   const updatedActiveTaskGroup = computed<string>(() => {
     return activeTaskGroup.value;
+  });
+
+  const updatedGroupLoading = computed<boolean>(() => {
+    return loadingGroups.value;
+  });
+
+  const updatedTasksLoading = computed<boolean>(() => {
+    return loadingTasks.value;
   });
 
   const taskActionLoading = computed<boolean>(() => {
@@ -253,6 +263,11 @@ export const useTaskStore = defineStore("taskStore", () => {
    * console.log(dateGroups.value); // ['2025-11-28', '2025-11-27', ...]
    */
   const getTaskGroups = async () => {
+    // initialte loader only if dateGroups is empty
+    if (!dateGroups.value.length) {
+      loadingGroups.value = true;
+    }
+
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -270,10 +285,13 @@ export const useTaskStore = defineStore("taskStore", () => {
         }
       );
 
+      loadingGroups.value = false;
+
       dateGroups.value = res.data;
     } catch (error) {
       console.error("Failed to fetch task groups:", error);
       dateGroups.value = [];
+      loadingGroups.value = false;
     }
   };
 
@@ -605,6 +623,8 @@ export const useTaskStore = defineStore("taskStore", () => {
     withTodayRecord,
     groupedByWeek,
     updatedActiveTaskGroup,
+    updatedGroupLoading,
+    updatedTasksLoading,
     taskActionLoading,
     getTaskList,
     searchTaskList,
