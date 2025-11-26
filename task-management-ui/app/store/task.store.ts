@@ -66,7 +66,21 @@ export const useTaskStore = defineStore("taskStore", () => {
       else {
         const weekOfMonth = Math.ceil(date.getDate() / 7);
         const month = format(date, "MMMM");
-        weekLabel = `${weekOfMonth}th week of ${month}`;
+        let thlabel = `${weekOfMonth}th`;
+
+        if (weekOfMonth == 1) {
+          thlabel = `${weekOfMonth}st`;
+        }
+
+        if (weekOfMonth == 2) {
+          thlabel = `${weekOfMonth}nd`;
+        }
+
+        if (weekOfMonth == 3) {
+          thlabel = `${weekOfMonth}rd`;
+        }
+
+        weekLabel = `${thlabel} week of ${month}`;
       }
 
       // Determine date label
@@ -507,6 +521,28 @@ export const useTaskStore = defineStore("taskStore", () => {
     }
   };
 
+  /**
+   * Reorders tasks using the API endpoint based on a provided array of task IDs.
+   *
+   * This function sends a PATCH request to the backend to update the sort order of tasks.
+   * It updates UI state by setting `updatingTask` and refreshes the task list after
+   * the operation is successful.
+   *
+   * ### Behavior:
+   * - If no authentication token is found, returns an unauthorized response.
+   * - Sends a PATCH request to the `/tasks-reorder` endpoint with the new order of task IDs.
+   * - Uses `onResponse` to capture the raw HTTP status code from the API response.
+   * - Refreshes the active task list after successfully reordering tasks.
+   * - Handles all network and API errors gracefully and returns a standardized `StoreActionResponse`.
+   *
+   * @param {number[]} taskIds - An array of task IDs in the desired order.
+   * @returns {Promise<StoreActionResponse>} A promise resolving with the result of the reorder action.
+   *
+   * @typedef {Object} StoreActionResponse
+   * @property {boolean} success - Indicates whether the operation succeeded.
+   * @property {string} message - A user-friendly message describing the result.
+   * @property {number} statusCode - The HTTP status code returned by the API.
+   */
   const sortTask = async (taskIds: number[]): Promise<StoreActionResponse> => {
     const token = localStorage.getItem("token");
     updatingTask.value = true;
@@ -569,6 +605,7 @@ export const useTaskStore = defineStore("taskStore", () => {
     withTodayRecord,
     groupedByWeek,
     updatedActiveTaskGroup,
+    taskActionLoading,
     getTaskList,
     searchTaskList,
     getTaskGroups,
