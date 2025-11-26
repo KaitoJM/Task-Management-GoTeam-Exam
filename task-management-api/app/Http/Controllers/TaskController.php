@@ -57,13 +57,11 @@ class TaskController extends Controller
         // Process assigning of task to authenticated user.
         $createdTask = Task::create([
             'description' => $request->description,
-            'user_id' => $userId
+            'user_id' => $userId,
+            'sort_order' => Task::where('user_id', $userId)
+                ->whereDate('created_at', today())
+                ->count()
         ]);
-
-        // If creation of task failed, return an error.
-        if (!$createdTask) {
-            return response()->json(['error' => 'Creation of task failed'], 400) ;
-        }
 
         // If success, return the newly created task data.
         return response()->json([
