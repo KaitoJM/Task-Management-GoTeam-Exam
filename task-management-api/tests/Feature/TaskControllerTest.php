@@ -4,6 +4,8 @@ use App\Models\User;
 use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\patchJson;
@@ -118,7 +120,7 @@ describe('Create user tasks data', function () {
             ->assertJsonPath('data.user_id', $user->id);
 
         // Check database
-        $this->assertDatabaseHas('tasks', [
+        assertDatabaseHas('tasks', [
             'description' => 'New task',
             'user_id' => $user->id,
         ]);
@@ -197,7 +199,7 @@ describe('Update Task', function () {
                  ->assertJsonPath('data.description', 'Updated description')
                  ->assertJsonPath('data.done', true);
 
-        $this->assertDatabaseHas('tasks', [
+        assertDatabaseHas('tasks', [
             'id' => $task->id,
             'description' => 'Updated description',
             'done' => true,
@@ -222,7 +224,7 @@ describe('Update Task', function () {
                  ->assertJsonPath('data.description', 'Partial update')
                  ->assertJsonPath('data.done', (int) false); // unchanged
 
-        $this->assertDatabaseHas('tasks', [
+        assertDatabaseHas('tasks', [
             'id' => $task->id,
             'description' => 'Partial update',
             'done' => false,
@@ -279,7 +281,7 @@ describe('Delete Task', function () {
 
         $response->assertNoContent(); // 204 status
 
-        $this->assertDatabaseMissing('tasks', [
+        assertDatabaseMissing('tasks', [
             'id' => $task->id,
         ]);
     });
@@ -292,7 +294,7 @@ describe('Delete Task', function () {
         $response = actingAs($user)->deleteJson("/api/tasks/{$task->id}");
 
         $response->assertStatus(404);
-        $this->assertDatabaseHas('tasks', [
+        assertDatabaseHas('tasks', [
             'id' => $task->id,
         ]);
     });
@@ -303,7 +305,7 @@ describe('Delete Task', function () {
         $response = deleteJson("/api/tasks/{$task->id}");
 
         $response->assertStatus(401);
-        $this->assertDatabaseHas('tasks', [
+        assertDatabaseHas('tasks', [
             'id' => $task->id,
         ]);
     });
