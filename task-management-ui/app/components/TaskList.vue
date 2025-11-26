@@ -1,7 +1,12 @@
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex-1 max-h-full overflow-auto px-4">
-      <ul class="flex flex-col gap-2" ref="list">
+    <div class="flex-1 max-h-full overflow-auto px-4 relative">
+      <TasksLoader v-show="taskStore.updatedTasksLoading"></TasksLoader>
+      <ul
+        v-show="!taskStore.updatedTasksLoading"
+        class="flex flex-col gap-2"
+        ref="list"
+      >
         <TaskItem
           v-for="task in tasks"
           :key="task.id"
@@ -55,6 +60,7 @@ import type { Task } from "~/types/task.type";
 import { useRouter } from "vue-router";
 import type { StoreActionResponse } from "~/types/response.type";
 import Sortable from "sortablejs";
+import TasksLoader from "./loaders/TasksLoader.vue";
 
 const taskStore = useTaskStore();
 const router = useRouter();

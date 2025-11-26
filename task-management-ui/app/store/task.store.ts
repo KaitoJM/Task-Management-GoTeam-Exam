@@ -160,7 +160,11 @@ export const useTaskStore = defineStore("taskStore", () => {
    * console.log(activeCollection.value);
    * // [{ id: 1, description: 'Task 1', done: true, ... }, ...]
    */
-  const getTaskList = async (date: string) => {
+  const getTaskList = async (date: string, applyLoader: boolean = false) => {
+    if (applyLoader) {
+      loadingTasks.value = true;
+    }
+
     activeTaskGroup.value = date;
     const token = localStorage.getItem("token");
 
@@ -186,12 +190,14 @@ export const useTaskStore = defineStore("taskStore", () => {
         }
       );
 
+      loadingTasks.value = false;
       activeCollection.value = res.data.map((task) => ({
         ...task,
         done: Boolean(task.done), // need to convert done type to boolean since it is being auto parse an int
       }));
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
+      loadingTasks.value = false;
       activeCollection.value = [];
     }
   };

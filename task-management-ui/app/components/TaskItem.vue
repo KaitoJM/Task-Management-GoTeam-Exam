@@ -5,7 +5,7 @@
     <button
       @click="handleToggle"
       :class="[
-        'flex items-center justify-center w-[20px] h-[20px] rounded-full border border-gray-200',
+        'flex items-center justify-center w-[20px] h-[20px] rounded-full border border-gray-200 cursor-pointer',
         props.done ? 'bg-black text-white' : 'bg-white text-black',
       ]"
     >
@@ -42,7 +42,7 @@
     <div class="flex justify-end">
       <button
         @click="attemptDelete(props.id)"
-        class="opacity-0 group-hover:opacity-100"
+        class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 cursor-pointer"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="lucide lucide-trash2-icon lucide-trash-2 size-5 text-gray-400"
+          class="lucide lucide-trash2-icon lucide-trash-2 size-5"
         >
           <path d="M10 11v6" />
           <path d="M14 11v6" />

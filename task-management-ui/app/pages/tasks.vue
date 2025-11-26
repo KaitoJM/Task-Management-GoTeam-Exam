@@ -22,7 +22,9 @@ watch(
   async (newQuery, oldQuery) => {
     console.log("Query changed:", newQuery, oldQuery);
 
-    await taskStore.getTaskList(route.query.date.toString());
+    if (route.query.date) {
+      await taskStore.getTaskList(route.query.date.toString(), true);
+    }
   },
   { immediate: true, deep: true }
 );
