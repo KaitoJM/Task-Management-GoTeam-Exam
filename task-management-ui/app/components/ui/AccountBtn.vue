@@ -64,9 +64,12 @@
 <script setup lang="ts">
 import type { UserInfo } from "@/types/user.type";
 import { log } from "console";
+import type { ApiError } from "~/types/response.type";
 
+const config = useRuntimeConfig();
 const userJson: string | null = localStorage.getItem("user");
 let user: UserInfo = {};
+const token = localStorage.getItem("token");
 
 const userName = ref<string>("");
 const userEmail = ref<string>("");
@@ -80,10 +83,25 @@ onMounted(() => {
   }
 });
 
-const logout = () => {
+const logout = async () => {
   const ans: boolean = confirm("Are you sure you want to logout?");
 
   if (ans) {
+    try {
+      const res = await $fetch(`${config.public.apiBase}logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      location.reload();
+    } catch (err) {
+      const error = err as ApiError;
+      console.error(`Error logging out: ${error}`);
+    }
   }
 };
 </script>
