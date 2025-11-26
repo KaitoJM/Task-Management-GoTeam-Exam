@@ -33,6 +33,7 @@
       <input
         v-else
         @blur="handleDescriptionUpdate"
+        @keyup="handleKeyup($event)"
         v-model="editableDescription"
         ref="inputRef"
         type="text"
@@ -97,6 +98,12 @@ const handleEditMode = async () => {
 const emit = defineEmits(["toggle"]);
 const handleToggle = () => {
   emit("toggle");
+};
+
+const handleKeyup = (e: KeyboardEvent) => {
+  if (e.key == "Enter") {
+    handleDescriptionUpdate();
+  }
 };
 
 const handleDescriptionUpdate = async () => {
