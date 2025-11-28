@@ -28,11 +28,13 @@ class TaskController extends Controller
     {
         $userId = Auth::id();
 
-        // Extract validated params
-        $params = $request->validated();
+        $params = [
+            'user_id' => $userId, 
+            ...$request->validated()
+        ];
 
         // Call service fetch method
-        $tasks = $this->taskService->getTasks($userId, $params);
+        $tasks = $this->taskService->getTasks($params);
 
         return TaskResource::collection($tasks);
     }
@@ -45,11 +47,8 @@ class TaskController extends Controller
         // Get authenticated user's ID
         $userId = Auth::id();
 
-        // Extract validated params
-        $params = $request->validated();
-        
         // Call service create method
-        $createdTask = $this->taskService->createTask($userId, $params);
+        $createdTask = $this->taskService->createTask($userId, $request->description);
 
         // If success, return the newly created task data.
         return response()->json([

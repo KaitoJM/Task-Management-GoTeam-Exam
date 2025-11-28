@@ -9,17 +9,24 @@ class TaskService
     /**
      * Get tasks for the given user with optional filters.
      *
-     * @param  int  $userId
+     * @param  int  $userId The ID of the user who owns the task
      * @param  array{
+     *     user_id: string|null
      *     created_at_date?: string|null,
      *     search?: string|null
-     * }  $params
+     * }  $params Search and filter fields are optional
      * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Task>
      */
-    public function getTasks(int $userId, $params = [])
+    public function getTasks($params = [])
     {
-        // Initial query of getting the task of the authenticated user.
-        $query = Task::where('user_id', $userId);
+        $query = Task::query();
+
+        // Filter by user id
+        if (isset($params['user_id'])) {
+            $userId = $params['user_id'];
+
+            $query->where('user_id', $userId);
+        }
 
         // Filter by created_at date
         if (isset($params['created_at_date'])) {
@@ -46,16 +53,18 @@ class TaskService
     /**
      * Store a new task for the given user.
      *
-     * @param  int  $userId
-     * @param  array{
-     *     description: string
-     * }  $params
+     * @param  int  $userId The ID of the user who owns the task.
+     * @param  string  $description The description text for the new task.
+     * 
+     * This will also auto generate $sort_order value which will place the newly created task at the end of the list.
+     * And will also auto set the value of status to pending
+     * 
      * @return \App\Models\Task
      */
-    public function createTask($userId, $params)
+    public function createTask(int $userId, string $description)
     {
         $createdTask = Task::create([
-            'description' => $params['description'],
+            'description' => $description,
             'user_id' => $userId,
             'sort_order' => Task::where('user_id', $userId)
                 ->whereDate('created_at', today())
@@ -67,7 +76,7 @@ class TaskService
 
     /**
      * Get specific Task data
-     * @param  int  $id
+     * @param  int  $id The ID of the task
      * @return \App\Models\Task
      */
     public function showTask(string $id)
@@ -81,7 +90,7 @@ class TaskService
 
     /**
      * Update the specific task.
-     * @param  int  $id
+     * @param  int  $id The ID of the task
      * @param  array{
      *     description?: string|null
      *     done?: boolean|null
@@ -102,7 +111,7 @@ class TaskService
 
     /**
      * Delete specific task.
-     * @param  int  $id
+     * @param  int  $id The ID of the task
      * @return \App\Models\Task
      */
     public function deleteTask(string $id)
