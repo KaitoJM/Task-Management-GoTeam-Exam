@@ -59,7 +59,7 @@ export const useTaskStore = defineStore("taskStore", () => {
 
       // Week difference relative to current week
       const weekDiff = differenceInCalendarWeeks(today, date, {
-        weekStartsOn: 1,
+        weekStartsOn: 0, // week starts on sunday
       });
 
       // Determine week label
