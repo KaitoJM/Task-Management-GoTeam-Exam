@@ -256,7 +256,7 @@ describe('Update Task', function () {
 
         $response = actingAs($user)->patchJson("/api/tasks/{$task->id}", $payload);
 
-        $response->assertStatus(404);
+        $response->assertStatus(403);
     });
 
     it('returns 401 for guests', function () {
@@ -293,7 +293,7 @@ describe('Delete Task', function () {
 
         $response = actingAs($user)->deleteJson("/api/tasks/{$task->id}");
 
-        $response->assertStatus(404);
+        $response->assertStatus(403);
         assertDatabaseHas('tasks', [
             'id' => $task->id,
         ]);

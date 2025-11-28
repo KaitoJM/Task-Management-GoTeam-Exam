@@ -10,39 +10,30 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Services\TaskService;
 
 class TaskController extends Controller
 {
+    protected TaskService $taskService;
+
+    public function __construct(TaskService $taskService)
+    {
+        $this->taskService = $taskService;
+    }
+
     /**
      * Display a listing of the task resource of the authenticated user.
      */
     public function index(FilterTaskRequest $request)
     {
-        // Get authenticated user's ID
         $userId = Auth::id();
 
-        // Initial query of getting the of the authenticated user.
-        $query = Task::where('user_id', $userId);
+        // Extract validated params
+        $params = $request->validated();
 
-        // Filter by created_at date
-        if ($request->filled('created_at_date')) {
-            $date = $request->created_at_date;
+        // Call service fetch method
+        $tasks = $this->taskService->getTasks($userId, $params);
 
-            $query->whereDate('created_at', $date);
-        }
-
-        // Filter by description
-        if ($request->filled('search')) {
-            $query->where('description', 'LIKE', '%' . $request->search . '%');
-        }
-
-        // Sort by sort_order ascending
-        $query->orderBy('sort_order', 'asc');
-
-        // Process query
-        $tasks = $query->get();
-
-        // Return a collection of the tasks.
         return TaskResource::collection($tasks);
     }
 
@@ -54,14 +45,11 @@ class TaskController extends Controller
         // Get authenticated user's ID
         $userId = Auth::id();
 
-        // Process assigning of task to authenticated user.
-        $createdTask = Task::create([
-            'description' => $request->description,
-            'user_id' => $userId,
-            'sort_order' => Task::where('user_id', $userId)
-                ->whereDate('created_at', today())
-                ->count()
-        ]);
+        // Extract validated params
+        $params = $request->validated();
+        
+        // Call service create method
+        $createdTask = $this->taskService->createTask($userId, $params);
 
         // If success, return the newly created task data.
         return response()->json([
@@ -75,7 +63,7 @@ class TaskController extends Controller
     public function show(string $id)
     {
         // Get task data by ID.
-        $task = Task::findOrFail($id);
+        $task = $this->taskService->showTask($id);
 
         // Return the tasks data.
         return new TaskResource($task);
@@ -90,12 +78,17 @@ class TaskController extends Controller
         $userId = Auth::id();
 
         // Ensure only owner can update
-        $task = Task::where('id', $id)
-            ->where('user_id', $userId)
-            ->firstOrFail();
+        $check = $this->taskService->showTask($id);
+        if ($check->user_id != $userId) {
+            return response()->json(['error' => 'You are not allowed to edit this task'], 403);
+        }
 
         // Only update fields that exist in the request
-        $task->update($request->only(['description', 'done', 'sort_order']));
+        $task = $this->taskService->updateTask($id, 
+            $request->only(
+                ['description', 'done', 'sort_order']
+            )
+        );
 
         // Return the updated task data
         return (new TaskResource($task))
@@ -111,13 +104,14 @@ class TaskController extends Controller
         // Get authenticated user's ID
         $userId = Auth::id();
 
-        // Ensure only owner can update
-        $task = Task::where('id', $id)
-            ->where('user_id', $userId)
-            ->firstOrFail();
+        // Ensure only owner can delete
+        $check = $this->taskService->showTask($id);
+        if ($check->user_id != $userId) {
+            return response()->json(['error' => 'You are not allowed to delete this task'], 403);
+        }
 
         // Process task deletion
-        $task->delete();
+        $task = $this->taskService->deleteTask($id);
 
         return response()->noContent(); // 204 response
     }
@@ -129,19 +123,17 @@ class TaskController extends Controller
         $userId = Auth::id();
 
         // Ensure only owner can update
-        $tasks = Task::whereIn('id', $ids)
-            ->where('user_id', $userId)
-            ->get();
+        foreach($ids as $indx => $id) {
+            $check = $this->taskService->showTask($id);
 
-        // Check if all requested IDs exist for this user
-        if ($tasks->count() !== count($ids)) {
-            abort(403, 'One or more tasks do not belong to the authenticated user.');
+            if ($check->user_id != $userId) {
+                return response()->json(['error' => 'One or more tasks do not belong to the authenticated user.'], 403);
+            }
         }
 
         // Only update fields that exist in the request
         foreach($ids as $indx => $id) {
-            $task = Task::where('id', $id)->firstOrFail();
-            $task->update(['sort_order' => $indx]);
+            $task = $this->taskService->updateTask($id, ['sort_order' => $indx]);
         }
 
         return response()->noContent(); // 204 response
